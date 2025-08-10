@@ -1,8 +1,26 @@
 import { test, expect } from '@playwright/test';
 
 test('pledge form shows and validates', async ({ page }) => {
-  await page.goto('/idea.php?id=1'); // adjust route
-  await expect(page.getByText('Send a Pledge')).toBeVisible();
+  // First create a test idea via API
+  const response = await page.request.post('/api.php?action=create_idea', {
+    form: {
+      submitter_name: 'Test Creator',
+      submitter_email: 'creator@test.com',
+      title: 'Test AI Idea',
+      summary: 'A test idea for E2E testing',
+      license_type: 'MIT',
+      support_needs: 'Testing support',
+      category: 'Other',
+      tags: 'test,ai'
+    }
+  });
+  
+  const data = await response.json();
+  expect(data.ok).toBe(true);
+  const ideaId = data.id;
+  
+  await page.goto(`/idea.php?id=${ideaId}`);
+  await expect(page.getByText('Send Pledge')).toBeVisible();
 
   // Fill the form
   await page.getByLabel('Your name').fill('Test User');
