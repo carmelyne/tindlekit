@@ -20,15 +20,19 @@ test('pledge form shows and validates', async ({ page }) => {
   const ideaId = data.id;
   
   await page.goto(`/idea.php?id=${ideaId}`);
+  
+  // Wait for page to load and check for key elements
+  await expect(page.getByText('Test AI Idea')).toBeVisible();
   await expect(page.getByText('Send Pledge')).toBeVisible();
 
   // Fill the form
-  await page.getByLabel('Your name').fill('Test User');
-  await page.getByLabel('Email').fill('test@example.com');
+  await page.getByPlaceholder('Your name').fill('Test User');
+  await page.getByPlaceholder('Your email').fill('test@example.com');
 
-  // Choose Token pledge
+  // Choose Token pledge and wait for token input to become visible
   await page.getByRole('button', { name: /Token/i }).click();
-  await page.getByLabel('Tokens').fill('5');
+  await expect(page.getByPlaceholder('Number of AI Tokens to pledge')).toBeVisible();
+  await page.getByPlaceholder('Number of AI Tokens to pledge').fill('5');
 
   // Bypass Turnstile for CI (optional): if you expose a testing hook, e.g. window.__bypassTurnstile = true
   // Otherwise, annotate this test to run only in environments where Turnstile is disabled/bypassed.
