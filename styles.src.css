@@ -1,0 +1,574 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tindlekit Design Tokens - CSS Variables */
+@layer base {
+  :root {
+    /* Colors from prompt specification */
+    --tk-bg: #0b1020;
+    --tk-card: #11162a;
+    --tk-border: #1a2332;
+    --tk-fg: #e6edf3;
+    --tk-muted: #9fb3c8;
+    --tk-accent: #22d3ee;
+    --tk-accent-start: #06b6d4;
+    --tk-success: #22c55e;
+
+    /* Spacing & Layout */
+    --tk-radius: 0.75rem;
+    --tk-radius-sm: 0.375rem;
+    --tk-spacing-unit: 1rem;
+    
+    /* Typography */
+    --tk-font-mono: ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    
+    /* Motion */
+    --tk-duration-fast: 150ms;
+    --tk-duration-normal: 250ms;
+    --tk-duration-slow: 350ms;
+    --tk-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --tk-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Shadows */
+    --tk-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --tk-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --tk-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --tk-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Tindlekit Base Styles - Dark Theme */
+  body {
+    background: var(--tk-bg);
+    color: var(--tk-fg);
+    min-height: 100vh;
+  }
+
+  .tk-gradient-bg {
+    background: radial-gradient(1000px 600px at 50% -20%, #14203a, var(--tk-bg));
+  }
+}
+
+/* Component Classes */
+@layer components {
+  .tk-card {
+    background: var(--tk-card);
+    border: 1px solid var(--tk-border);
+    border-radius: var(--tk-radius);
+    box-shadow: var(--tk-shadow-sm);
+    transition: all var(--tk-duration-normal) var(--tk-ease-out);
+  }
+
+  .tk-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--tk-shadow-lg);
+  }
+
+  .tk-btn {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md font-semibold text-sm transition-all duration-150 cursor-pointer;
+    min-height: 44px;
+    border: none;
+    text-decoration: none;
+  }
+
+  .tk-btn-primary {
+    background: linear-gradient(135deg, var(--tk-accent-start), var(--tk-accent));
+    color: #0a1525;
+    font-weight: 700;
+    box-shadow: var(--tk-shadow-sm);
+  }
+
+  .tk-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--tk-shadow-md);
+  }
+
+  .tk-btn-secondary {
+    background: var(--tk-card);
+    color: var(--tk-fg);
+    border: 1px solid var(--tk-border);
+  }
+
+  .tk-btn-secondary:hover {
+    background: var(--tk-border);
+  }
+
+  .tk-badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium;
+  }
+
+  .tk-badge-success {
+    background: var(--tk-success);
+    color: var(--tk-bg);
+  }
+
+  .tk-badge-muted {
+    background: rgba(159, 179, 200, 0.1);
+    color: var(--tk-muted);
+    border: 1px solid rgba(159, 179, 200, 0.2);
+  }
+
+  .tk-text-muted {
+    color: var(--tk-muted);
+  }
+
+  /* Form Components */
+  .tk-label {
+    display: block;
+    font-weight: 500;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: var(--tk-fg);
+    margin-bottom: 0.375rem;
+  }
+
+  .tk-input {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--tk-border);
+    border-radius: var(--tk-radius-sm);
+    background: var(--tk-card);
+    color: var(--tk-fg);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    transition: all var(--tk-duration-fast) var(--tk-ease-out);
+  }
+
+  .tk-input:focus {
+    outline: none;
+    border-color: var(--tk-accent);
+    box-shadow: 0 0 0 1px var(--tk-accent);
+  }
+
+  .tk-input::placeholder {
+    color: var(--tk-muted);
+  }
+
+  .tk-input[type="file"] {
+    padding: 0.5rem;
+    cursor: pointer;
+  }
+
+  textarea.tk-input {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  /* Focus states for accessibility */
+  .tk-btn:focus-visible,
+  .tk-card:focus-visible,
+  .tk-input:focus-visible,
+  a:focus-visible {
+    outline: 2px solid var(--tk-accent);
+    outline-offset: 2px;
+  }
+}
+
+/** App tokens */
+@layer components {
+  .token-badge {
+    @apply inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium bg-emerald-600 text-white dark:bg-emerald-500;
+  }
+  .card {
+    @apply rounded-lg border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md px-4 py-2 font-semibold border border-transparent bg-zinc-900 text-white hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white;
+  }
+  .btn-secondary {
+    @apply bg-white text-zinc-900 border border-zinc-200 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-white dark:border-zinc-700 dark:hover:bg-zinc-800;
+  }
+  .input {
+    @apply w-full rounded-md border border-zinc-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-zinc-900 dark:border-zinc-700 dark:text-white;
+  }
+  .label {
+    @apply mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300;
+  }
+  .muted {
+    @apply text-sm text-zinc-500 dark:text-zinc-400;
+  }
+}
+
+/* Tindlekit utility classes */
+@layer utilities {
+  .text-tk-fg {
+    color: var(--tk-fg);
+  }
+  
+  .text-tk-muted {
+    color: var(--tk-muted);
+  }
+  
+  .text-tk-subtle {
+    color: rgba(159, 179, 200, 0.7);
+  }
+  
+  .text-tk-accent {
+    color: var(--tk-accent);
+  }
+  
+  .bg-tk-bg {
+    background: var(--tk-bg);
+  }
+  
+  .bg-tk-card {
+    background: var(--tk-card);
+  }
+  
+  .border-tk-border {
+    border-color: var(--tk-border);
+  }
+}
+
+/* Additional utilities for enhanced cards */
+@layer utilities {
+  .stretched-link::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    pointer-events: auto;
+    background-color: rgba(0,0,0,0);
+    border-radius: inherit;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Primary color classes for enhanced branding */
+  .text-primary-600 {
+    color: rgb(34 197 94);
+  }
+  .text-primary-400 {
+    color: rgb(74 222 128);
+  }
+  .bg-primary-50 {
+    background-color: rgb(240 253 244);
+  }
+  .bg-primary-950 {
+    background-color: rgb(5 46 22);
+  }
+  .text-primary-700 {
+    color: rgb(21 128 61);
+  }
+  .border-primary-200 {
+    border-color: rgb(187 247 208);
+  }
+  .bg-primary-900\/20 {
+    background-color: rgb(20 83 45 / 0.2);
+  }
+  .text-primary-300 {
+    color: rgb(134 239 172);
+  }
+  .border-primary-800\/30 {
+    border-color: rgb(22 101 52 / 0.3);
+  }
+
+  /* Accent colors for gradients */
+  .bg-accent-50 {
+    background-color: rgb(239 246 255);
+  }
+  .bg-accent-950 {
+    background-color: rgb(23 37 84);
+  }
+
+  /* Gradient backgrounds */
+  .bg-gradient-to-br {
+    background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
+  }
+  .from-primary-50 {
+    --tw-gradient-from: rgb(240 253 244);
+    --tw-gradient-to: transparent;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+  .via-white {
+    --tw-gradient-to: transparent;
+    --tw-gradient-stops: var(--tw-gradient-from), rgb(255 255 255), var(--tw-gradient-to);
+  }
+  .to-accent-50 {
+    --tw-gradient-to: rgb(239 246 255);
+  }
+  .dark\:from-primary-950:is(.dark *) {
+    --tw-gradient-from: rgb(5 46 22);
+    --tw-gradient-to: transparent;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+  .dark\:via-zinc-950:is(.dark *) {
+    --tw-gradient-to: transparent;
+    --tw-gradient-stops: var(--tw-gradient-from), rgb(9 9 11), var(--tw-gradient-to);
+  }
+  .dark\:to-accent-950:is(.dark *) {
+    --tw-gradient-to: rgb(23 37 84);
+  }
+
+  /* Additional widths for card layout */
+  .w-48 {
+    width: 12rem;
+  }
+  .w-10 {
+    width: 2.5rem;
+  }
+  .h-10 {
+    height: 2.5rem;
+  }
+
+  /* Ensure flex utilities are available */
+  .flex-shrink-0 {
+    flex-shrink: 0;
+  }
+  .flex-1 {
+    flex: 1 1 0%;
+  }
+  .flex-col {
+    flex-direction: column;
+  }
+  .border-r {
+    border-right-width: 1px;
+  }
+  .overflow-hidden {
+    overflow: hidden;
+  }
+
+  /* Responsive Leaderboard Card Layout */
+  .tk-card-layout {
+    display: flex;
+    flex-direction: column;
+  }
+
+  @media (min-width: 768px) {
+    .tk-card-layout {
+      flex-direction: row;
+    }
+  }
+
+  .tk-card-stats {
+    flex-shrink: 0;
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(34, 211, 238, 0.15));
+    border: 1px solid var(--tk-border);
+    padding: 1rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .tk-card-stats {
+      width: 12rem;
+      padding: 1.5rem;
+      flex-direction: column;
+      justify-content: center;
+      border-right: 1px solid var(--tk-border);
+      border-bottom: none;
+    }
+  }
+
+  .tk-rank-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background-color: var(--tk-border);
+    color: var(--tk-fg);
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-bottom: 0;
+  }
+
+  @media (min-width: 768px) {
+    .tk-rank-badge {
+      width: 2.5rem;
+      height: 2.5rem;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+  }
+
+  .tk-rank-first {
+    background-color: var(--tk-success);
+    color: #07101f;
+    box-shadow: 0 0 0 2px var(--tk-success);
+  }
+
+  .tk-stats-tokens {
+    flex: 1;
+    text-align: center;
+  }
+
+  @media (min-width: 768px) {
+    .tk-stats-tokens {
+      margin-bottom: 1rem;
+    }
+  }
+
+  .tk-stats-label {
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: var(--tk-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .tk-stats-label {
+      font-size: 0.75rem;
+    }
+  }
+
+  .tk-stats-value {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--tk-accent);
+  }
+
+  @media (min-width: 768px) {
+    .tk-stats-value {
+      font-size: 1.5rem;
+    }
+  }
+
+  .tk-stats-likes {
+    font-size: 0.75rem;
+    color: var(--tk-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+  }
+
+  .tk-card-content {
+    flex: 1;
+    padding: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .tk-card-content {
+      padding: 1.5rem;
+    }
+  }
+
+  .tk-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .tk-card-title-wrapper {
+    flex: 1;
+  }
+
+  .tk-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    line-height: 1.25;
+  }
+
+  @media (min-width: 768px) {
+    .tk-card-title {
+      font-size: 1.125rem;
+    }
+  }
+
+  .tk-card-summary {
+    color: var(--tk-muted);
+    font-size: 0.875rem;
+    line-height: 1.625;
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @media (min-width: 768px) {
+    .tk-card-summary {
+      -webkit-line-clamp: 3;
+    }
+  }
+
+  .tk-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .tk-card-tags {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .tk-card-like-btn {
+    position: relative;
+    z-index: 10;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  /* Hero Gradient Text */
+  .tk-hero-gradient {
+    background: linear-gradient(135deg, 
+      #22d3ee 0%,     /* Tindlekit accent cyan */
+      #06b6d4 25%,    /* Tindlekit accent start */
+      #10b981 50%,    /* Emerald-500 (green) */
+      #3b82f6 75%,    /* Blue-500 */
+      #22d3ee 100%    /* Back to accent cyan */
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    background-size: 200% 200%;
+    animation: gradientShift 8s ease-in-out infinite;
+  }
+
+  @keyframes gradientShift {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  /* Fallback for browsers that don't support background-clip: text */
+  @supports not (-webkit-background-clip: text) {
+    .tk-hero-gradient {
+      color: var(--tk-accent);
+      animation: none;
+    }
+  }
+
+  /* Reduce motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    .tk-hero-gradient {
+      animation: none;
+      background-position: 0% 50%;
+    }
+  }
+}

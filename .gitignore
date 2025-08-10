@@ -1,0 +1,33 @@
+# Environment & config
+.env
+*.local
+*.secret
+# config.php     # if it contains DB/API keys
+
+# Agent configs
+.agent-gtp5
+.agent-claude
+
+# Dependencies
+node_modules/
+
+# Build output
+deploy/
+dist/
+build/
+.vite/
+.cache/
+*.log
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE/Editor files
+.vscode/
+.idea/
+
+# Backups & temp files
+*.bak
+*.tmp
+*.swp

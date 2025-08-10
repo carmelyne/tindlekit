@@ -1,0 +1,193 @@
+/* Tindlekit Design Tokens - CSS Variables */
+:root {
+  /* Colors from prompt specification */
+  --tk-bg: #0b1020;
+  --tk-card: #11162a;
+  --tk-border: #1a2332;
+  --tk-fg: #e6edf3;
+  --tk-muted: #9fb3c8;
+  --tk-accent: #22d3ee;
+  --tk-accent-start: #06b6d4;
+  --tk-success: #22c55e;
+
+  /* Spacing & Layout */
+  --tk-radius: 0.75rem;
+  --tk-radius-sm: 0.375rem;
+  --tk-spacing-unit: 1rem;
+  
+  /* Typography */
+  --tk-font-mono: ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  
+  /* Motion */
+  --tk-duration-fast: 150ms;
+  --tk-duration-normal: 250ms;
+  --tk-duration-slow: 350ms;
+  --tk-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --tk-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Shadows */
+  --tk-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --tk-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --tk-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --tk-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Tindlekit Base Styles - Dark Theme */
+.tk-theme {
+  background: var(--tk-bg);
+  color: var(--tk-fg);
+  min-height: 100vh;
+}
+
+.tk-theme.tk-gradient-bg {
+  background: radial-gradient(1000px 600px at 50% -20%, #14203a, var(--tk-bg));
+}
+
+/* Component Base Classes */
+.tk-card {
+  background: var(--tk-card);
+  border: 1px solid var(--tk-border);
+  border-radius: var(--tk-radius);
+  box-shadow: var(--tk-shadow-sm);
+  transition: all var(--tk-duration-normal) var(--tk-ease-out);
+}
+
+.tk-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--tk-shadow-lg);
+}
+
+.tk-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--tk-radius-sm);
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition: all var(--tk-duration-fast) var(--tk-ease-out);
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  min-height: 44px; /* Touch target */
+}
+
+.tk-btn-primary {
+  background: linear-gradient(135deg, var(--tk-accent-start), var(--tk-accent));
+  color: #07101f;
+  box-shadow: var(--tk-shadow-sm);
+}
+
+.tk-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--tk-shadow-md);
+}
+
+.tk-btn-secondary {
+  background: var(--tk-card);
+  color: var(--tk-fg);
+  border: 1px solid var(--tk-border);
+}
+
+.tk-btn-secondary:hover {
+  background: var(--tk-border);
+}
+
+.tk-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1rem;
+}
+
+.tk-badge-success {
+  background: var(--tk-success);
+  color: var(--tk-bg);
+}
+
+.tk-badge-muted {
+  background: rgba(159, 179, 200, 0.1);
+  color: var(--tk-muted);
+  border: 1px solid rgba(159, 179, 200, 0.2);
+}
+
+.tk-text-muted {
+  color: var(--tk-muted);
+}
+
+/* Focus states for accessibility */
+.tk-btn:focus-visible,
+.tk-card:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--tk-accent);
+  outline-offset: 2px;
+}
+
+/* Motion safe preferences */
+@media (prefers-reduced-motion: reduce) {
+  .tk-card,
+  .tk-btn,
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* WCAG AA contrast verified utilities */
+.tk-high-contrast {
+  color: var(--tk-fg);
+  background: var(--tk-bg);
+}
+
+.tk-medium-contrast {
+  color: var(--tk-muted);
+}
+
+/* Form Components */
+.tk-label {
+  display: block;
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--tk-fg);
+  margin-bottom: 0.375rem;
+}
+
+.tk-input {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--tk-border);
+  border-radius: var(--tk-radius-sm);
+  background: var(--tk-card);
+  color: var(--tk-fg);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition: all var(--tk-duration-fast) var(--tk-ease-out);
+}
+
+.tk-input:focus {
+  outline: none;
+  border-color: var(--tk-accent);
+  box-shadow: 0 0 0 1px var(--tk-accent);
+}
+
+.tk-input::placeholder {
+  color: var(--tk-muted);
+}
+
+.tk-input[type="file"] {
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+textarea.tk-input {
+  resize: vertical;
+  min-height: 80px;
+}

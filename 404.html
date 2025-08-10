@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Page not found — Tindlekit</title>
+    <meta name="robots" content="noindex">
+    <style>
+      :root {
+        --bg: #0b1020;
+        --fg: #e6edf3;
+        --muted: #9fb3c8;
+        --card: #11162a;
+        --accent: #22d3ee
+      }
+
+      * {
+        box-sizing: border-box
+      }
+
+      html,
+      body {
+        height: 100%
+      }
+
+      body {
+        margin: 0;
+        background: radial-gradient(1000px 600px at 50% -20%, #14203a, var(--bg));
+        color: var(--fg);
+        font: 500 16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px
+      }
+
+      .card {
+        max-width: 720px;
+        width: 100%;
+        background: var(--card);
+        border: 1px solid #24324a;
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+        padding: 28px
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+        line-height: 1.25
+      }
+
+      p {
+        margin: 8px 0;
+        color: var(--muted)
+      }
+
+      .row {
+        display: flex;
+        gap: 16px;
+        align-items: center
+      }
+
+      .icon {
+        font-size: 42px
+      }
+
+      .cta {
+        margin-top: 16px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap
+      }
+
+      .btn {
+        appearance: none;
+        border: 1px solid #2a3a56;
+        background: #0f1528;
+        color: var(--fg);
+        padding: 10px 14px;
+        border-radius: 10px;
+        text-decoration: none
+      }
+
+      .btn:hover {
+        border-color: #35507a
+      }
+
+      .primary {
+        border-color: transparent;
+        background: linear-gradient(90deg, #06b6d4, #22d3ee);
+        color: #07101f
+      }
+
+      .search {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px
+      }
+
+      .search input {
+        flex: 1;
+        min-width: 220px;
+        background: #0f1528;
+        border: 1px solid #2a3a56;
+        border-radius: 10px;
+        padding: 10px 12px;
+        color: var(--fg)
+      }
+
+      .search input::placeholder {
+        color: #7a8ba5
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="card" role="main" aria-labelledby="nf-title">
+      <div class="row">
+        <div class="icon">🧭</div>
+        <div>
+          <h1 id="nf-title">Tindlekit 404: This page doesn’t exist</h1>
+          <p>Looks like you’ve wandered off the map. I’m a broke dev hosting this on a tiny box, so some links might be missing in action. Don’t worry—reading still works fine.</p>
+        </div>
+      </div>
+      <div class="cta">
+        <a class="btn primary" href="/">Back to Leaderboard</a>
+        <a class="btn" href="/submit-idea.php">Submit an Idea</a>
+        <a class="btn" href="/user.php?email=hello@carmelyne.com">See a sample profile</a>
+      </div>
+
+      <form class="search" action="/" method="get" role="search" aria-label="Search ideas">
+        <input type="search" name="q" placeholder="Search ideas…" aria-label="Search ideas">
+        <button class="btn" type="submit">Search</button>
+      </form>
+    </div>
+  </body>
+
+</html>

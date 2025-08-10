@@ -1,0 +1,59 @@
+# Task List for The Andrej Effect – Distributed, Open Source, Vibe Code Level 2 Edition
+
+## 1. Project Setup
+- [ ] Initialize project structure (backend, frontend, config, docs).
+- [ ] Create schema.sql defining `ideas` table.
+
+## 2. Backend (PHP)
+- [ ] Implement route: GET /ideas (list all ideas).
+- [ ] Implement route: POST /ideas (submit new idea).
+- [ ] Implement route: POST /ideas/{id}/tokens (allocate tokens).
+- [ ] Implement route: DELETE /ideas/{id} (delete idea).
+
+## 3. Frontend (HTML + JS + Tailwind)
+- [ ] **Adopt Tailwind CSS**: install via npm with PostCSS + Autoprefixer; use Vite for dev/build.
+- [ ] **Responsive UI**: Idea submission form and Leaderboard pages with mobile-first layout, fluid typography, and container spacing.
+- [ ] **Token badges**: render 🍀 with Tailwind utility classes and accessible labels.
+- [ ] **Accessible by default**: proper labels, focus states, color contrast ≥ 4.5:1, ARIA-live for form errors.
+- [ ] **Dark mode**: class-based (`.dark`) theme with readable token colors.
+- [ ] **Client-side validation**: inline error messages, disabled submit while pending, success/toast state.
+- [ ] **Empty / loading / error states** for both pages.
+- [ ] **Reusable components**: `Button`, `Input`, `Card`, `Badge`, `TableRow` (no inline CSS; consistent naming).
+- [ ] **Meta & icons**: favicon, social OG tags, and basic SEO tags on index.
+
+### 3.a Frontend Build & Quality
+- [ ] **Vite setup**: `vite` scripts for dev/preview/build; hash filenames for cache busting.
+- [ ] **Tailwind config**: `tailwind.config.js` witaq.h `content` paths to `frontend/**/*.html`, `frontend/**/*.js`, and PHP templates.
+- [ ] **PostCSS**: `postcss.config.js` with `tailwindcss` and `autoprefixer`.
+- [ ] **Purge & minify**: production build removes unused classes.
+- [ ] **Prettier + Tailwind plugin** for class order; ESLint for JS.
+- [ ] **Lighthouse targets**: PWA not required; Perf ≥ 90, Accessbility ≥ 95, Best Practices ≥ 95, SEO ≥ 90.
+
+## 4. Configuration
+- [ ] Provide a `config.php` file for database connection settings.
+- [ ] Include instructions to import schema.sql.
+
+## 5. Open Data Endpoint
+- [ ] Implement `/ideas.json` returning all ideas in JSON format.
+
+## 6. Documentation
+- [ ] Write README with setup instructions (shared hosting friendly).
+- [ ] Add CONTRIBUTING.md for future contributors.
+- [ ] Verify teaching repo clarity for Vibe Coding Level 2 learners.
+
+## 7. Future-proofing
+- [ ] Add placeholder hook for "boost agent" integration.
+- [ ] Comment code for easy AI summarizer plugin integration.
+
+
+touch index.html
+touch leaderboard.html
+touch styles.css
+touch main.js
+touch api.php
+touch schema.sql
+touch config.php
+touch package.json
+touch tailwind.config.js
+touch postcss.config.js
+touch vite.config.js

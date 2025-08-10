@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>We’re a bit swamped — Tindlekit</title>
+    <meta name="robots" content="noindex">
+    <style>
+      :root {
+        --bg: #0b1020;
+        --fg: #e6edf3;
+        --muted: #9fb3c8;
+        --card: #11162a;
+        --accent: #22d3ee
+      }
+
+      * {
+        box-sizing: border-box
+      }
+
+      html,
+      body {
+        height: 100%
+      }
+
+      body {
+        margin: 0;
+        background: radial-gradient(1000px 600px at 50% -20%, #14203a, var(--bg));
+        color: var(--fg);
+        font: 500 16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px
+      }
+
+      .card {
+        max-width: 720px;
+        width: 100%;
+        background: var(--card);
+        border: 1px solid #24324a;
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+        padding: 28px
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+        line-height: 1.25
+      }
+
+      p {
+        margin: 8px 0;
+        color: var(--muted)
+      }
+
+      .row {
+        display: flex;
+        gap: 16px;
+        align-items: center
+      }
+
+      .whale {
+        font-size: 42px
+      }
+
+      .cta {
+        margin-top: 16px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap
+      }
+
+      .btn {
+        appearance: none;
+        border: 1px solid #2a3a56;
+        background: #0f1528;
+        color: var(--fg);
+        padding: 10px 14px;
+        border-radius: 10px;
+        text-decoration: none
+      }
+
+      .btn:hover {
+        border-color: #35507a
+      }
+
+      .primary {
+        border-color: transparent;
+        background: linear-gradient(90deg, #06b6d4, #22d3ee);
+        color: #07101f
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="card" role="status" aria-live="polite">
+      <div class="row">
+        <div class="whale">🐋</div>
+        <div>
+          <h1>Tindlekit 503: We’re a bit swamped</h1>
+          <p>Looks like a lot of people love this proof‑of‑concept. I’m a broke dev hosting this on a tiny box, so
+            writes are paused for a minute while traffic settles. Reading should still work fine.</p>
+        </div>
+      </div>
+      <div class="cta">
+        <a class="btn primary" href="/">Back to Leaderboard</a>
+        <a class="btn" href="/user.php?email=hello@carmelyne.com">See a sample profile</a>
+      </div>
+      <p style="margin-top:12px">If this keeps happening I can’t immediately spin up a bigger box, but I’ll keep tuning
+        things. Thanks for the love. 💚</p>
+    </div>
+  </body>
+
+</html>

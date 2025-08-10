@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+
+jobs:
+  php-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, curl, pdo_sqlite
+          tools: composer
+
+      - name: Install PHP deps
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run PHPUnit
+        env:
+          APP_ENV: test
+          BYPASS_TURNSTILE: '1'
+        run: composer test:api
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: php-tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Node deps
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Start test server
+        run: |
+          php -S 127.0.0.1:8080 -t . > server.log 2>&1 &
+          echo $! > server.pid
+          sleep 2
+      - name: Run E2E
+        env:
+          E2E_BASE_URL: http://127.0.0.1:8080
+          BYPASS_TURNSTILE: '1'
+        run: npx playwright test
+
+      - name: Stop server
+        if: always()
+        run: |
+          kill $(cat server.pid) || true
+          tail -n +1 server.log || true
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Quick JS syntax check
+        run: |
+          npm -v
+          # add eslint later; placeholder keeps the job in the matrix
+          echo "OK"

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<phpunit bootstrap="tests/bootstrap.php" colors="true">
+  <testsuites>
+    <testsuite name="API">
+      <directory>tests/Api</directory>
+    </testsuite>
+  </testsuites>
+  <php>
+    <env name="APP_ENV" value="test"/>
+    <env name="CF_TURNSTILE_SECRET" value="test-secret"/>
+    <env name="DB_DSN" value="sqlite::memory:"/>
+    <env name="DB_USER" value=""/>
+    <env name="DB_PASS" value=""/>
+    <env name="BYPASS_TURNSTILE" value="1"/>
+  </php>
+</phpunit>
