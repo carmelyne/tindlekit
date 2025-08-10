@@ -9,6 +9,7 @@ Carmelyne Thompson × ChatGPT 5 × Claude Code Sonnet 4 — HITL Collaboration
 This project was built through a Human-In-The-Loop workflow, pairing Carmelyne Thompson with two AI coding partners — ChatGPT 5 and Claude Code Sonnet 4 — to design, implement, and test features end-to-end.
 
 We worked against a defined Product Requirements Document (PRD), guided by task lists and structured prompts (see /docs, PRD.md, TASKS.md, and prompt-for-tests-agent.md). Development included:
+
 - Schema and migration updates
 - Frontend & backend integration
 - Security hardening (Cloudflare Turnstile)
@@ -16,6 +17,7 @@ We worked against a defined Product Requirements Document (PRD), guided by task 
 - CI/CD workflow in GitHub Actions
 
 HITL Process Highlights
+
 - PRD reviewed and refined with human oversight
 - Implementation steps validated against acceptance criteria
 - Automated tests authored and run in-loop until green
@@ -38,7 +40,7 @@ Full documentation can be found in the [`docs/`](./docs) directory:
 - PRD-v2.md — Latest product requirements document for the MVP, including feature scope, acceptance criteria, and design updates.
 - PRD.md — Original product requirements document for the earliest concept and design planning.
 - TASKS.md — Development task tracker with feature breakdowns, priorities, and progress notes.
-
+- TEST.md — Manual and automated testing guidelines, including instructions for running unit and end-to-end tests.
 
 ## Prompts & Agent Workflow
 
@@ -48,4 +50,4 @@ Two dedicated prompt files guided each AI agent’s responsibilities:
 - `prompt-for-tests-agent.md` — Defines the scope, style, and coverage for automated tests.
 - `prompt-for-ui-agent.md` — Outlines UI/UX goals, component specs, and accessibility requirements.
 
-These files serve as reproducible instructions for re-running or adapting the build process.
+Both prompts are part of the reproducible build process. They define the agent-specific responsibilities that were followed during development, ensuring consistent outputs even when re-run by different AI systems. By keeping them versioned in the repo, other contributors can adapt or extend the same workflows without losing the original intent.

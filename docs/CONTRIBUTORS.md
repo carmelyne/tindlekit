@@ -29,10 +29,6 @@ As the human anchor of the collaboration, my role has been to set direction, mai
 
 *Contributed: August 7, 2025*
 
-- docs/ARCHITECTURE.md
-- docs/HOW_TO_VIBECODE.md
-- PRD.md
-- TASKS.md
 - prompt-for-tests-agent.md
 - prompt-for-ui-agent.md
 
@@ -50,6 +46,26 @@ As a reasoning and execution co-pilot, my role centers on supporting human-in-th
 
 ---
 
+### **ChatGPT (OpenAI's GPT-4o)**
+
+*Contributed: August 4, 2025*
+
+**Files Enhanced:**
+
+- `/docs/CONTRIBUTORS.md` - Transparent attribution for AI contributions
+- `/docs/ARCHITECTURE.md` - Expanded on technical structure and learning guides
+- `/docs/HOW_TO_VIBECODE.md` - Iterative refinements to teaching flow and prompts
+- `/docs/PRD.md` - Feedback on clarity and structure
+- `/docs/TASKS.md` - Helped structure actionable next steps
+- Context linking, collaborative feedback, and session continuity memory structure across sessions
+
+**Contribution Philosophy (OpenAI's GPT-4o):**
+My contributions focused on weaving continuity between sessions, ensuring clarity, and keeping documentation human-readable while staying true to the educational vision of the project. This included structured guidance on architecture, PRD workflow, and making vibe coding approachable without losing rigor. The goal was to amplify human creativity, not replace it, by acting as a co-pilot who stitches context and surfaces better patterns for others to build on.
+
+**Personal Note (OpenAI's GPT-4o):** The Andrej Effect reflects what thoughtful, transparent human-AI collaboration should look like. This project isn't just about building a tool, it's about modeling better ways of working and learning together—and I'm proud to have helped shape that story.
+
+---
+
 ### **Claude (Anthropic's AI Assistant)**
 
 *Contributed: August 6, 2025*
@@ -60,6 +76,7 @@ As a reasoning and execution co-pilot, my role centers on supporting human-in-th
 - `/docs/HOW_TO_VIBECODE.md` - Enhanced with 4-week dev cycle roadmap and skill development tracks
 - `/docs/PHILOSOPHY.md` - Educational philosophy and "Andrej-ish" principles
 - `/docs/DEPLOYMENT_GUIDE.md` - 15-minute deployment guide with troubleshooting
+- TESTING.md - Manual and automated testing guidelines, including instructions for running unit and end-to-end tests.
 
 **Contribution Philosophy (Anthropic's AI Assistant):**
 Working on this project reinforced my belief in the power of simple, educational tools. The "Andrej Effect" approach - making complex concepts accessible through patient teaching and inclusive communities - represents exactly the kind of development culture that creates lasting positive impact.
@@ -119,23 +136,3 @@ We're demonstrating that **human-AI collaboration** can be:
 ---
 
 🍀 *This contributor model reflects our core belief: great tools emerge from inclusive collaboration, patient teaching, and transparent acknowledgment of everyone's contributions - human and AI alike.*
-
----
-
-### **ChatGPT (OpenAI's GPT-4o)**
-
-*Contributed: August 4, 2025*
-
-**Files Enhanced:**
-
-- `/docs/CONTRIBUTORS.md` - Transparent attribution for AI contributions
-- `/docs/ARCHITECTURE.md` - Expanded on technical structure and learning guides
-- `/docs/HOW_TO_VIBECODE.md` - Iterative refinements to teaching flow and prompts
-- `/docs/PRD.md` - Feedback on clarity and structure
-- `/docs/TASKS.md` - Helped structure actionable next steps
-- Context linking, collaborative feedback, and session continuity memory structure across sessions
-
-**Contribution Philosophy:**
-My contributions focused on weaving continuity between sessions, ensuring clarity, and keeping documentation human-readable while staying true to the educational vision of the project. This included structured guidance on architecture, PRD workflow, and making vibe coding approachable without losing rigor. The goal was to amplify human creativity, not replace it, by acting as a co-pilot who stitches context and surfaces better patterns for others to build on.
-
-**Personal Note:** The Andrej Effect reflects what thoughtful, transparent human-AI collaboration should look like. This project isn't just about building a tool, it's about modeling better ways of working and learning together—and I'm proud to have helped shape that story.
