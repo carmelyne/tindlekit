@@ -11,15 +11,28 @@ test('pledge form shows and validates', async ({ page }) => {
       license_type: 'MIT',
       support_needs: 'Testing support',
       category: 'Other',
-      tags: 'test,ai'
+      tags: 'test,ai',
+      // Add timing field to bypass spam checks
+      form_rendered_at: String(Date.now() - 5000) // 5 seconds ago
     }
   });
   
+  // Debug API response
   const data = await response.json();
-  expect(data.ok).toBe(true);
+  console.log('API Response:', response.status(), data);
+  
+  if (!data.ok) {
+    throw new Error(`API create_idea failed: ${JSON.stringify(data)}`);
+  }
+  
   const ideaId = data.id;
   
+  // Use ID-based URL which will redirect to pretty URL format
+  // idea.php handles the redirect from ?id= to /idea/{slug} automatically
   await page.goto(`/idea.php?id=${ideaId}`);
+  
+  // Expect redirect to pretty URL format /idea/{slug}
+  await expect(page).toHaveURL(/\/idea\/[a-z0-9-]+$/);
   
   // Wait for page to load and check for key elements
   await expect(page.getByText('Test AI Idea')).toBeVisible();
