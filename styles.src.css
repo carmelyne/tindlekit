@@ -155,6 +155,33 @@
     min-height: 80px;
   }
 
+  /* Select dropdown styling */
+  select.tk-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%239FB3C8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1rem;
+    padding-right: 3rem;
+  }
+
+  /* Option and optgroup styling */
+  select.tk-input option {
+    background: var(--tk-card);
+    color: var(--tk-fg);
+    padding: 0.5rem;
+  }
+
+  select.tk-input optgroup {
+    background: var(--tk-bg);
+    color: var(--tk-muted);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.5rem;
+  }
+
   /* Focus states for accessibility */
   .tk-btn:focus-visible,
   .tk-card:focus-visible,
