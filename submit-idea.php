@@ -2,7 +2,11 @@
 <?php require_once __DIR__ . '/config.php'; ?>
 <html lang="en" class="h-full">
 
-  <?php include 'includes/head.php'; ?>
+  <?php $pageType = 'submit';
+  $pageTitle = 'Submit an Idea — Tindlekit';
+  $metaDesc = 'Share your idea with the commons and get early support.';
+  $canonicalURL = 'https://tindlekit.com/submit-idea';
+  include 'includes/head.php'; ?>
 
   <body class="h-full">
     <!-- Three.js background container -->
@@ -206,16 +210,163 @@
               maxlength="120" pattern="^[#A-Za-z0-9\-\s_]*$" />
             <p class="text-xs text-tk-subtle mt-1">Add relevant hashtags separated by spaces.</p>
           </div>
-          <div>
+          <div class="relative">
             <label for="license_type" class="tk-label">Preferred License</label>
-            <select id="license_type" name="license_type" class="tk-input" required>
-              <option value="">Select a license</option>
-              <option value="MIT">MIT</option>
-              <option value="Apache 2.0">Apache 2.0</option>
-              <option value="GPLv3">GPLv3</option>
-              <option value="Proprietary">Proprietary</option>
-              <option value="Other">Other</option>
-            </select>
+            
+            <!-- Custom dropdown button -->
+            <button type="button" id="licenseCombo" class="tk-input text-left cursor-pointer flex items-center justify-between w-full"
+              aria-haspopup="listbox" aria-expanded="false" aria-labelledby="license_type">
+              <span id="licenseSelected" class="text-tk-muted">Select a license</span>
+              <i class="iconoir-nav-arrow-down"></i>
+            </button>
+            
+            <!-- Hidden input for form submission -->
+            <input type="hidden" id="license_type" name="license_type" required />
+
+            <!-- Custom dropdown menu -->
+            <div id="licenseDropdown"
+              class="absolute z-10 mt-1 w-full rounded-lg border border-tk-border bg-tk-card shadow-lg hidden">
+              <ul id="licenseListbox" role="listbox" class="max-h-60 overflow-auto py-1">
+                <!-- Permissive -->
+                <li class="px-3 py-1 text-xs font-semibold text-tk-muted uppercase tracking-wide">Permissive</li>
+                <li role="option" data-value="MIT" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">MIT</li>
+                <li role="option" data-value="Apache-2.0" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">Apache 2.0</li>
+                <li role="option" data-value="BSD-2-Clause" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">BSD 2-Clause</li>
+                <li role="option" data-value="BSD-3-Clause" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">BSD 3-Clause</li>
+                <li role="option" data-value="Unlicense" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">The Unlicense</li>
+                <li role="option" data-value="CC0-1.0" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">CC0 1.0 (Public Domain)</li>
+                
+                <!-- Copyleft -->
+                <li class="px-3 py-1 text-xs font-semibold text-tk-muted uppercase tracking-wide border-t border-tk-border mt-2 pt-3">Copyleft</li>
+                <li role="option" data-value="GPL-2.0" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">GPL v2.0</li>
+                <li role="option" data-value="GPL-3.0" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">GPL v3.0</li>
+                <li role="option" data-value="AGPL-3.0" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">AGPL v3.0</li>
+                <li role="option" data-value="LGPL-2.1" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">LGPL v2.1</li>
+                <li role="option" data-value="LGPL-3.0" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">LGPL v3.0</li>
+                
+                <!-- Creative Commons -->
+                <li class="px-3 py-1 text-xs font-semibold text-tk-muted uppercase tracking-wide border-t border-tk-border mt-2 pt-3">Creative Commons</li>
+                <li role="option" data-value="CC-BY-4.0" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">CC BY 4.0</li>
+                <li role="option" data-value="CC-BY-SA-4.0" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">CC BY-SA 4.0</li>
+                <li role="option" data-value="CC-BY-NC-4.0" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">CC BY-NC 4.0</li>
+                <li role="option" data-value="CC-BY-NC-SA-4.0" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">CC BY-NC-SA 4.0</li>
+                
+                <!-- Polyform -->
+                <li class="px-3 py-1 text-xs font-semibold text-tk-muted uppercase tracking-wide border-t border-tk-border mt-2 pt-3">Polyform</li>
+                <li role="option" data-value="Polyform-Noncommercial-1.0.0" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">Polyform Noncommercial 1.0.0</li>
+                <li role="option" data-value="Polyform-Small-Business-1.0.0" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">Polyform Small Business 1.0.0</li>
+                
+                <!-- Other -->
+                <li class="px-3 py-1 text-xs font-semibold text-tk-muted uppercase tracking-wide border-t border-tk-border mt-2 pt-3">Other</li>
+                <li role="option" data-value="Public-Domain" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">Public Domain (other)</li>
+                <li role="option" data-value="Proprietary" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">Proprietary</li>
+                <li role="option" data-value="Other" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">Other / Not listed</li>
+              </ul>
+            </div>
+            
+            <script>
+              // License dropdown functionality
+              (function () {
+                const combo = document.getElementById('licenseCombo');
+                const selected = document.getElementById('licenseSelected');
+                const hidden = document.getElementById('license_type');
+                const dropdown = document.getElementById('licenseDropdown');
+                const listbox = document.getElementById('licenseListbox');
+                if (!combo || !selected || !hidden || !dropdown || !listbox) return;
+
+                let activeIndex = -1;
+                const options = Array.from(listbox.querySelectorAll('[role="option"]'));
+
+                function open() {
+                  dropdown.classList.remove('hidden');
+                  combo.setAttribute('aria-expanded', 'true');
+                  activeIndex = -1;
+                  updateActiveOption();
+                }
+
+                function close() {
+                  dropdown.classList.add('hidden');
+                  combo.setAttribute('aria-expanded', 'false');
+                  activeIndex = -1;
+                  updateActiveOption();
+                }
+
+                function updateActiveOption() {
+                  options.forEach((opt, i) => {
+                    if (i === activeIndex) {
+                      opt.setAttribute('aria-selected', 'true');
+                      opt.classList.add('bg-tk-accent', 'text-tk-bg');
+                    } else {
+                      opt.removeAttribute('aria-selected');
+                      opt.classList.remove('bg-tk-accent', 'text-tk-bg');
+                    }
+                  });
+                }
+
+                function commit(value) {
+                  hidden.value = value;
+                  const selectedOption = options.find(opt => opt.dataset.value === value);
+                  if (selectedOption) {
+                    selected.textContent = selectedOption.textContent;
+                    selected.classList.remove('text-tk-muted');
+                    selected.classList.add('text-tk-fg');
+                  }
+                  close();
+                  combo.focus();
+                }
+
+                // Toggle dropdown
+                combo.addEventListener('click', () => {
+                  if (dropdown.classList.contains('hidden')) {
+                    open();
+                  } else {
+                    close();
+                  }
+                });
+
+                // Keyboard navigation
+                combo.addEventListener('keydown', (e) => {
+                  if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (dropdown.classList.contains('hidden')) {
+                      open();
+                    } else {
+                      activeIndex = Math.min(activeIndex + 1, options.length - 1);
+                      updateActiveOption();
+                    }
+                  } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (!dropdown.classList.contains('hidden')) {
+                      activeIndex = Math.max(activeIndex - 1, 0);
+                      updateActiveOption();
+                    }
+                  } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (!dropdown.classList.contains('hidden') && activeIndex >= 0) {
+                      commit(options[activeIndex].dataset.value);
+                    } else {
+                      open();
+                    }
+                  } else if (e.key === 'Escape') {
+                    close();
+                  }
+                });
+
+                // Mouse selection
+                listbox.addEventListener('click', (e) => {
+                  const li = e.target.closest('[role="option"]');
+                  if (!li) return;
+                  commit(li.dataset.value);
+                });
+
+                // Close on outside click
+                document.addEventListener('click', (e) => {
+                  if (!combo.contains(e.target) && !dropdown.contains(e.target)) {
+                    close();
+                  }
+                });
+              })();
+            </script>
           </div>
           <div>
             <label for="support_needs" class="tk-label">Support Needed</label>
@@ -265,6 +416,65 @@
       </section>
     </main>
 
+    <script>
+      (function(){
+        const form = document.getElementById('ideaForm');
+        if (!form) return;
+        const btn = document.getElementById('submitBtn');
+        const statusEl = document.getElementById('formStatus');
+
+        function setStatus(msg){ if (statusEl) { statusEl.textContent = msg; } }
+        function disable(v){ if (btn) { btn.disabled = !!v; btn.ariaBusy = v ? 'true' : 'false'; } }
+
+        form.addEventListener('submit', async function(e){
+          e.preventDefault();
+          setStatus('Submitting…');
+          disable(true);
+          try {
+            const fd = new FormData(form);
+            // Cloudflare Turnstile: ensure token is present if widget is rendered
+            const ts = document.querySelector('input[name="cf-turnstile-response"]');
+            if (ts && !fd.get('cf-turnstile-response')) {
+              fd.append('cf-turnstile-response', ts.value || '');
+            }
+
+            const res = await fetch('api.php?action=create_idea', {
+              method: 'POST',
+              body: fd,
+              credentials: 'same-origin'
+            });
+
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data || data.error) {
+              const msg = (data && (data.message || data.error)) ? (data.message || data.error) : ('Request failed ('+res.status+')');
+              setStatus('Error: ' + msg);
+              disable(false);
+              return;
+            }
+
+            // Success → redirect to canonical
+            if (data.idea_url) {
+              setStatus('Success! Redirecting…');
+              window.location.assign(data.idea_url);
+              return;
+            }
+
+            // Fallback: still show success if id exists
+            if (data.id) {
+              setStatus('Success!');
+              window.location.assign('/idea.php?id=' + encodeURIComponent(String(data.id)));
+              return;
+            }
+
+            setStatus('Submitted, but no redirect URL returned.');
+            disable(false);
+          } catch (err) {
+            setStatus('Network error. Please try again.');
+            disable(false);
+          }
+        });
+      })();
+    </script>
     <script type="module" src="ui/tindlekit.js"></script>
     <script type="module" src="main.js"></script>
 
