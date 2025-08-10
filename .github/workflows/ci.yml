@@ -45,10 +45,24 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Start test server
+        env:
+          APP_ENV: production
+          BYPASS_TURNSTILE: '1'
+          DB_DSN: 'sqlite:./tindlekit_e2e.db'
+          DB_USER: ''
+          DB_PASS: ''
         run: |
+          # Initialize database for E2E tests
+          php -r "
+          require 'config.php';
+          \$pdo = new PDO(\$DB_DSN, \$DB_USER, \$DB_PASS, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+          \$schema = file_get_contents('schema.sql');
+          \$pdo->exec(\$schema);
+          echo 'Database initialized for E2E tests\n';
+          "
           php -S 127.0.0.1:8080 -t . > server.log 2>&1 &
           echo $! > server.pid
-          sleep 2
+          sleep 3
       - name: Run E2E
         env:
           E2E_BASE_URL: http://127.0.0.1:8080
