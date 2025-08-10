@@ -52,13 +52,13 @@ jobs:
           DB_USER: ''
           DB_PASS: ''
         run: |
-          # Initialize database for E2E tests
+          # Initialize SQLite database for E2E tests using test bootstrap
           php -r "
-          require 'config.php';
-          \$pdo = new PDO(\$DB_DSN, \$DB_USER, \$DB_PASS, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
-          \$schema = file_get_contents('schema.sql');
-          \$pdo->exec(\$schema);
-          echo 'Database initialized for E2E tests\n';
+          putenv('DB_DSN=sqlite:./tindlekit_e2e.db');
+          putenv('DB_USER=');
+          putenv('DB_PASS=');
+          require 'tests/bootstrap.php';
+          echo 'SQLite database initialized for E2E tests\n';
           "
           php -S 127.0.0.1:8080 -t . > server.log 2>&1 &
           echo $! > server.pid
