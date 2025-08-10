@@ -29,7 +29,7 @@
               aria-expanded="false" aria-controls="catFilterOverlay">Categories ▼</button>
           </div>
           <p class="text-sm text-tk-muted">
-            Support early-stage AI projects with <span class="font-semibold text-tk-accent">💙💚🧡
+            Support early-stage AI projects with <span class="font-semibold text-tk-accent">💙🤍💚
               tokens</span>
           </p>
         </div>
