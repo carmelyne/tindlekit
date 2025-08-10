@@ -14,20 +14,46 @@ try {
   exit;
 }
 
-$id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
-if ($id <= 0) {
-  http_response_code(400);
-  echo 'Invalid id';
-  exit;
-}
+$slug = isset($_GET['slug']) ? trim((string)$_GET['slug']) : '';
+$id   = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
-$stmt = $pdo->prepare('SELECT id, title, summary, tokens, likes, url, video_url, file_path, file_mime, file_size, created_at, submitter_name, submitter_email, submitter_user_id, license_type, support_needs, category, tags FROM ideas WHERE id = ?');
-$stmt->execute([$id]);
+if ($slug !== '') {
+  // Validate slug pattern: lowercase letters, numbers, dashes only
+  if (!preg_match('~^[a-z0-9-]+$~', $slug)) {
+    http_response_code(400);
+    echo 'Invalid slug';
+    exit;
+  }
+  $stmt = $pdo->prepare('SELECT id, slug, title, summary, tokens, likes, url, video_url, file_path, file_mime, file_size, created_at, submitter_name, submitter_email, submitter_user_id, license_type, support_needs, category, tags FROM ideas WHERE slug = ?');
+  $stmt->execute([$slug]);
+} else {
+  if ($id <= 0) {
+    http_response_code(400);
+    echo 'Invalid id';
+    exit;
+  }
+  $stmt = $pdo->prepare('SELECT id, slug, title, summary, tokens, likes, url, video_url, file_path, file_mime, file_size, created_at, submitter_name, submitter_email, submitter_user_id, license_type, support_needs, category, tags FROM ideas WHERE id = ?');
+  $stmt->execute([$id]);
+}
 $idea = $stmt->fetch();
 if (!$idea) {
   http_response_code(404);
   echo 'Not found';
   exit;
+}
+// Normalize ID from fetched row for downstream queries
+$id = (int)($idea['id'] ?? 0);
+
+// If request used ?id= and we have a canonical slug, 301 redirect to /idea/{slug}
+if (isset($_GET['id']) && !headers_sent()) {
+  $slugCanonical = '';
+  if (!empty($idea['slug']) && preg_match('~^[a-z0-9-]+$~', (string)$idea['slug'])) {
+    $slugCanonical = (string)$idea['slug'];
+  }
+  if ($slugCanonical !== '') {
+    header('Location: /idea/' . $slugCanonical, true, 301);
+    exit;
+  }
 }
 
 // Aggregate stats for display: total token count and distinct contributors
@@ -113,7 +139,6 @@ function render_tags_chips($tagsArr)
   return '<div class="flex flex-wrap gap-2 -mb-2">' . implode('', $chips) . '</div>';
 }
 
-
 if (!function_exists('video_embed')) {
   function video_embed($url)
   {
@@ -133,6 +158,19 @@ if (!function_exists('video_embed')) {
     return '';
   }
 }
+
+if (!function_exists('slugify')) {
+  function slugify(string $s): string {
+    $s = strtolower($s);
+    // replace any non letter/number with a dash
+    $s = preg_replace('~[^a-z0-9]+~', '-', $s);
+    // collapse multiple dashes
+    $s = preg_replace('~-+~', '-', $s);
+    // trim dashes from ends
+    $s = trim($s, '-');
+    return $s ?: 'idea';
+  }
+}
 $embedUrl = video_embed($idea['video_url'] ?? '');
 
 $hasFile = !empty($idea['file_path']);
@@ -140,6 +178,45 @@ $filePublic = $hasFile ? ('uploads/' . basename($idea['file_path'])) : null;
 $fileMime = $idea['file_mime'] ?? '';
 $category = $idea['category'] ?? 'Other';
 $tagsArr = parse_tags($idea['tags'] ?? '');
+// Resolve profile link: prefer /user/{username}, fallback to user.php?id={id} (no email in URL)
+$profileHref = '#';
+$profileDataAttr = '';
+$submitterEmail = $idea['submitter_email'] ?? '';
+$submitterUserId = isset($idea['submitter_user_id']) ? (int)$idea['submitter_user_id'] : 0;
+
+try {
+  // First try via known user_id
+  if ($submitterUserId > 0) {
+    $uStmt = $pdo->prepare('SELECT id, username FROM users WHERE id = ? LIMIT 1');
+    $uStmt->execute([$submitterUserId]);
+    $u = $uStmt->fetch();
+  } elseif ($submitterEmail !== '') {
+    // Fallback lookup by email (server-side only; do not expose in URL)
+    $uStmt = $pdo->prepare('SELECT id, username FROM users WHERE email = ? LIMIT 1');
+    $uStmt->execute([$submitterEmail]);
+    $u = $uStmt->fetch();
+  } else {
+    $u = null;
+  }
+
+  if ($u && !empty($u['username'])) {
+    $profileHref = '/user/' . rawurlencode($u['username']);
+    $profileDataAttr = 'data-user-username="' . h($u['username']) . '"';
+  } elseif ($u && !empty($u['id'])) {
+    $profileHref = '/user.php?id=' . (int)$u['id'];
+    $profileDataAttr = 'data-user-id="' . (int)$u['id'] . '"';
+  } elseif ($submitterUserId > 0) {
+    $profileHref = '/user.php?id=' . $submitterUserId;
+    $profileDataAttr = 'data-user-id="' . $submitterUserId . '"';
+  } else {
+    // Last resort: no link
+    $profileHref = '#';
+    $profileDataAttr = '';
+  }
+} catch (Throwable $e) {
+  $profileHref = ($submitterUserId > 0) ? ('/user.php?id=' . $submitterUserId) : '#';
+  $profileDataAttr = ($submitterUserId > 0) ? ('data-user-id="' . $submitterUserId . '"') : '';
+}
 // Token → USD estimate (aspirational; configurable via env TOKEN_USD, default 5)
 $TOKEN_USD = (int) (getenv('TOKEN_USD') ?: 5);
 $usd_est = ((int) ($idea['tokens'] ?? 0)) * $TOKEN_USD;
@@ -147,7 +224,17 @@ $usd_est = ((int) ($idea['tokens'] ?? 0)) * $TOKEN_USD;
 <!doctype html>
 <html lang="en" class="h-full">
 
-  <?php include 'includes/head.php'; ?>
+  <?php // after fetching $idea with fields: title, summary, tokens, likes, url, video_url, file_path, ... (optional) slug
+  $pageType = 'idea';
+  $pageTitle = $idea['title'] . ' — Tindlekit';
+  $metaDesc  = $idea['description'] ?? ($idea['summary'] ?? 'Idea on Tindlekit');
+  // prefer DB slug if it only contains lowercase letters, numbers, and dashes; otherwise generate from title
+  $slugFromDb = isset($idea['slug']) && preg_match('~^[a-z0-9-]+$~', (string)$idea['slug']) ? (string)$idea['slug'] : '';
+  $slug = $slugFromDb !== '' ? $slugFromDb : slugify($idea['title'] ?? '');
+  $canonicalURL = 'https://tindlekit.com/idea/' . $slug;
+  // expose back for later use if needed
+  $idea['slug'] = $slug;
+  include 'includes/head.php'; ?>
 
   <body class="h-full">
     <!-- Three.js background container -->
@@ -164,11 +251,11 @@ $usd_est = ((int) ($idea['tokens'] ?? 0)) * $TOKEN_USD;
               <?= h($idea['title']) ?>
             </h1>
             <div class="flex items-center gap-3 text-sm text-tk-muted">
-              <span>by <a href="user.php?email=<?= urlencode($idea['submitter_email']) ?>" 
-                         class="text-tk-accent hover:text-tk-fg transition-colors font-medium"
-                         title="View all ideas by <?= h($idea['submitter_name']) ?>">
-                <?= h($idea['submitter_name']) ?>
-              </a></span>
+              <span>by <a href="<?= h($profileHref) ?>" <?= $profileDataAttr ?>
+                  class="text-tk-accent hover:text-tk-fg transition-colors font-medium"
+                  title="View all ideas by <?= h($idea['submitter_name']) ?>">
+                  <?= h($idea['submitter_name']) ?>
+                </a></span>
               <span>•</span>
               <span><?= date('M j, Y', strtotime($idea['created_at'])) ?></span>
               <span>•</span>
@@ -215,7 +302,8 @@ $usd_est = ((int) ($idea['tokens'] ?? 0)) * $TOKEN_USD;
         <div class="tk-card p-0 mb-6 overflow-hidden">
           <?php if ($embedUrl): ?>
             <div class="aspect-video">
-              <iframe class="w-full h-full" src="<?= h($embedUrl) ?>" title="Video" frameborder="0" allowfullscreen></iframe>
+              <iframe class="w-full h-full" src="<?= h($embedUrl) ?>" title="Video" frameborder="0"
+                allowfullscreen></iframe>
             </div>
           <?php elseif ($hasFile && strpos($fileMime, 'image/') === 0): ?>
             <img src="<?= h($filePublic) ?>" alt="<?= h($idea['title']) ?>" class="w-full h-auto" />
@@ -233,7 +321,8 @@ $usd_est = ((int) ($idea['tokens'] ?? 0)) * $TOKEN_USD;
             $shortSummary = implode(' ', array_slice($words, 0, 50));
             $needsReadMore = count($words) > 50;
             echo nl2br($shortSummary);
-            if ($needsReadMore) echo '...';
+            if ($needsReadMore)
+              echo '...';
             ?>
           </div>
 
@@ -241,7 +330,8 @@ $usd_est = ((int) ($idea['tokens'] ?? 0)) * $TOKEN_USD;
             <div id="summary-full" class="text-lg leading-relaxed text-tk-fg hidden">
               <?= nl2br($summary) ?>
             </div>
-            <button id="read-more-btn" class="text-tk-accent hover:text-tk-accent-start font-medium mt-2 flex items-center gap-1">
+            <button id="read-more-btn"
+              class="text-tk-accent hover:text-tk-accent-start font-medium mt-2 flex items-center gap-1">
               <span>Read More</span> <i class="iconoir-nav-arrow-down"></i>
             </button>
           <?php endif; ?>
@@ -277,7 +367,8 @@ $usd_est = ((int) ($idea['tokens'] ?? 0)) * $TOKEN_USD;
               <?php endif; ?>
 
               <?php if (!empty($idea['url'])): ?>
-                <a href="<?= h($idea['url']) ?>" target="_blank" rel="noopener" class="flex items-center gap-2 tk-btn tk-btn-secondary">
+                <a href="<?= h($idea['url']) ?>" target="_blank" rel="noopener"
+                  class="flex items-center gap-2 tk-btn tk-btn-secondary">
                   <i class="iconoir-link"></i> External Link
                 </a>
               <?php endif; ?>
@@ -292,55 +383,87 @@ $usd_est = ((int) ($idea['tokens'] ?? 0)) * $TOKEN_USD;
         <div class="tk-card p-6">
           <div class="flex items-center gap-2 mb-4">
             <i class="iconoir-community text-tk-accent"></i>
-            <h2 class="text-xl font-semibold text-tk-fg">Want to contribute?</h2>
+            <h2 id="contribute-heading" class="text-xl font-semibold text-tk-fg">Want to contribute?</h2>
           </div>
 
           <div class="space-y-4 mb-6">
             <div class="flex flex-wrap gap-2">
-              <button onclick="selectPledgeType('time')" class="pledge-type-btn tk-btn tk-btn-secondary" data-type="time">
+              <button onclick="selectPledgeType('time')" class="pledge-type-btn tk-btn tk-btn-secondary"
+                data-type="time">
                 <i class="iconoir-clock"></i> Time
               </button>
-              <button onclick="selectPledgeType('mentorship')" class="pledge-type-btn tk-btn tk-btn-secondary" data-type="mentorship">
+              <button onclick="selectPledgeType('mentorship')" class="pledge-type-btn tk-btn tk-btn-secondary"
+                data-type="mentorship">
                 <i class="iconoir-learning"></i> Mentorship
               </button>
-              <button onclick="selectPledgeType('token')" class="pledge-type-btn tk-btn tk-btn-secondary" data-type="token">
+              <button onclick="selectPledgeType('token')" class="pledge-type-btn tk-btn tk-btn-secondary"
+                data-type="token">
                 <i class="iconoir-coins"></i> AI Tokens
               </button>
             </div>
 
             <div class="text-sm text-tk-muted">
-              Join <?= $totalContributors > 0 ? number_format($totalContributors) . ' other contributors' : 'the community' ?> building this idea together.
+              Join
+              <?= $totalContributors > 0 ? number_format($totalContributors) . ' other contributors' : 'the community' ?>
+              building this idea together.
             </div>
           </div>
 
-          <form id="interestForm" class="space-y-4">
+          <form id="interestForm" class="space-y-4" aria-labelledby="contribute-heading">
             <div>
-              <input id="supporter_name" name="supporter_name" type="text" class="tk-input" placeholder="Your name" required />
+              <label for="supporter_name" class="tk-label">Your Name</label>
+              <input id="supporter_name" name="supporter_name" type="text" class="tk-input" placeholder="Your name"
+                required />
             </div>
             <div>
-              <input id="supporter_email" name="supporter_email" type="email" class="tk-input" placeholder="Your email" required />
+              <label for="supporter_email" class="tk-label">Your Email</label>
+              <input id="supporter_email" name="supporter_email" type="email" class="tk-input" placeholder="Your email"
+                required />
             </div>
 
-            <input type="hidden" name="pledge_type" id="selected_pledge_type" required />
+            <fieldset>
+              <legend class="tk-label">Contribution Type</legend>
+              <input type="hidden" name="pledge_type" id="selected_pledge_type" required />
+              <div class="space-y-4 mb-6">
+                <div class="flex flex-wrap gap-2" role="radiogroup" aria-labelledby="contribute-heading">
+                  <button type="button" onclick="selectPledgeType('time')" class="pledge-type-btn tk-btn tk-btn-secondary"
+                    data-type="time" role="radio" aria-checked="false" tabindex="0">
+                    <i class="iconoir-clock"></i> Time
+                  </button>
+                  <button type="button" onclick="selectPledgeType('mentorship')" class="pledge-type-btn tk-btn tk-btn-secondary"
+                    data-type="mentorship" role="radio" aria-checked="false" tabindex="-1">
+                    <i class="iconoir-learning"></i> Mentorship
+                  </button>
+                  <button type="button" onclick="selectPledgeType('token')" class="pledge-type-btn tk-btn tk-btn-secondary"
+                    data-type="token" role="radio" aria-checked="false" tabindex="-1">
+                    <i class="iconoir-coins"></i> AI Tokens
+                  </button>
+                </div>
+              </div>
+            </fieldset>
 
             <div id="tokenAmountRow" style="display:none;">
-              <input id="tokens_amount" name="tokens" type="number" min="1" class="tk-input" placeholder="Number of AI Tokens to pledge" />
-              <p class="text-xs text-tk-subtle mt-1">1 token ≈ $<?= $TOKEN_USD ?> (aspirational value)</p>
+              <label for="tokens_amount" class="tk-label">Number of AI Tokens</label>
+              <input id="tokens_amount" name="tokens" type="number" min="1" class="tk-input"
+                placeholder="Number of AI Tokens to pledge" aria-describedby="token-help" />
+              <p id="token-help" class="text-xs text-tk-subtle mt-1">1 token ≈ $<?= $TOKEN_USD ?> (aspirational value)</p>
             </div>
 
             <div>
+              <label for="pledge_details" class="tk-label">Contribution Details</label>
               <textarea id="pledge_details" name="pledge_details" rows="3" class="tk-input"
                 placeholder="Describe your offer (e.g. hours, skills, how you can help)"></textarea>
             </div>
 
-<?php $turnstileSiteKey = getenv('CF_TURNSTILE_SITE_KEY') ?: (isset($CF_TURNSTILE_SITE_KEY) ? $CF_TURNSTILE_SITE_KEY : ''); ?>
-<?php if (!empty($turnstileSiteKey)): ?>
-  <div class="space-y-2">
-    <label class="tk-label">Security Verification</label>
-    <div class="cf-turnstile" data-sitekey="<?= htmlspecialchars($turnstileSiteKey, ENT_QUOTES, 'UTF-8') ?>" data-theme="dark"></div>
-    <p class="text-xs text-tk-subtle">Please complete the security check to protect against spam.</p>
-  </div>
-<?php endif; ?>
+            <?php $turnstileSiteKey = getenv('CF_TURNSTILE_SITE_KEY') ?: (isset($CF_TURNSTILE_SITE_KEY) ? $CF_TURNSTILE_SITE_KEY : ''); ?>
+            <?php if (!empty($turnstileSiteKey)): ?>
+              <div class="space-y-2">
+                <label class="tk-label">Security Verification</label>
+                <div class="cf-turnstile" data-sitekey="<?= htmlspecialchars($turnstileSiteKey, ENT_QUOTES, 'UTF-8') ?>"
+                  data-theme="dark"></div>
+                <p class="text-xs text-tk-subtle">Please complete the security check to protect against spam.</p>
+              </div>
+            <?php endif; ?>
 
             <div class="flex items-center justify-between">
               <button type="submit" class="tk-btn tk-btn-primary" id="interestSubmitBtn">
@@ -351,7 +474,7 @@ $usd_est = ((int) ($idea['tokens'] ?? 0)) * $TOKEN_USD;
                 <span class="text-xs">Safe & Private</span>
               </div>
             </div>
-            <div id="interestStatus" class="text-sm text-tk-muted"></div>
+            <div id="interestStatus" class="text-sm text-tk-muted" aria-live="polite" aria-atomic="true" role="status"></div>
           </form>
         </div>
 
@@ -365,7 +488,8 @@ $usd_est = ((int) ($idea['tokens'] ?? 0)) * $TOKEN_USD;
           <?php if ($totalContributors > 0): ?>
             <div class="grid grid-cols-2 gap-4 mb-4">
               <div class="text-center p-4 bg-tk-bg/50 rounded-lg">
-                <div class="text-2xl font-bold text-tk-accent" id="tokenTotalDisplay2"><?= number_format($totalTokens) ?></div>
+                <div class="text-2xl font-bold text-tk-accent" id="tokenTotalDisplay2"><?= number_format($totalTokens) ?>
+                </div>
                 <div class="text-xs text-tk-muted">tokens pledged</div>
               </div>
               <div class="text-center p-4 bg-tk-bg/50 rounded-lg">
@@ -411,24 +535,45 @@ $usd_est = ((int) ($idea['tokens'] ?? 0)) * $TOKEN_USD;
         }
 
         // Pledge type selection
-        window.selectPledgeType = function(type) {
+        window.selectPledgeType = function (type) {
           document.getElementById('selected_pledge_type').value = type;
 
-          // Update button states
-          document.querySelectorAll('.pledge-type-btn').forEach(btn => {
+          // Update button states and ARIA attributes
+          document.querySelectorAll('.pledge-type-btn').forEach((btn, index) => {
+            const isSelected = btn.dataset.type === type;
+            
+            // Visual state
             btn.classList.remove('tk-btn-primary');
             btn.classList.add('tk-btn-secondary');
+            if (isSelected) {
+              btn.classList.remove('tk-btn-secondary');
+              btn.classList.add('tk-btn-primary');
+            }
+            
+            // ARIA and focus management
+            btn.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+            btn.setAttribute('tabindex', isSelected ? '0' : '-1');
+            
+            if (isSelected) {
+              btn.focus();
+            }
           });
 
-          const selectedBtn = document.querySelector(`[data-type="${type}"]`);
-          if (selectedBtn) {
-            selectedBtn.classList.remove('tk-btn-secondary');
-            selectedBtn.classList.add('tk-btn-primary');
-          }
-
-          // Show/hide token amount
+          // Show/hide token amount with proper label association
           const tokenRow = document.getElementById('tokenAmountRow');
-          tokenRow.style.display = type === 'token' ? '' : 'none';
+          const tokenInput = document.getElementById('tokens_amount');
+          if (type === 'token') {
+            tokenRow.style.display = '';
+            if (tokenInput) {
+              tokenInput.setAttribute('required', 'true');
+            }
+          } else {
+            tokenRow.style.display = 'none';
+            if (tokenInput) {
+              tokenInput.removeAttribute('required');
+              tokenInput.value = '';
+            }
+          }
         };
 
         // Fetch and display pledges
@@ -490,6 +635,28 @@ $usd_est = ((int) ($idea['tokens'] ?? 0)) * $TOKEN_USD;
             '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
           }[c]));
         }
+
+        // Keyboard navigation for pledge type radio group
+        (function() {
+          const radioGroup = document.querySelector('[role="radiogroup"]');
+          if (radioGroup) {
+            radioGroup.addEventListener('keydown', function(e) {
+              const radios = Array.from(document.querySelectorAll('.pledge-type-btn'));
+              const currentIndex = radios.findIndex(radio => radio.getAttribute('tabindex') === '0');
+              
+              if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                const newIndex = (currentIndex + 1) % radios.length;
+                selectPledgeType(radios[newIndex].dataset.type);
+              } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                const newIndex = (currentIndex - 1 + radios.length) % radios.length;
+                selectPledgeType(radios[newIndex].dataset.type);
+              }
+            });
+          }
+        })();
+
         fetchPledges();
         // Toggle token amount input when pledge_type changes
         (function () {
@@ -556,7 +723,7 @@ $usd_est = ((int) ($idea['tokens'] ?? 0)) * $TOKEN_USD;
             }
             form.reset();
             // Reset Turnstile widget after successful submission
-            try { if (window.turnstile && typeof window.turnstile.reset === 'function') { window.turnstile.reset(); } } catch (_) {}
+            try { if (window.turnstile && typeof window.turnstile.reset === 'function') { window.turnstile.reset(); } } catch (_) { }
             // Reset pledge type selection
             document.querySelectorAll('.pledge-type-btn').forEach(btn => {
               btn.classList.remove('tk-btn-primary');
@@ -574,65 +741,65 @@ $usd_est = ((int) ($idea['tokens'] ?? 0)) * $TOKEN_USD;
         });
       </script>
       <script type="module">
-      // Dispatch a custom event when a user profile link is clicked (for future signals/analytics)
-      (function(){
-        const profileLink = document.querySelector('[data-user-email]');
-        if (!profileLink) return;
-        profileLink.addEventListener('click', (e) => {
-          const email = profileLink.getAttribute('data-user-email') || '';
-          // Consumers can listen for this to record profile views / quality signals
-          window.dispatchEvent(new CustomEvent('user:profile-click', {
-            detail: { email, ideaId: <?= (int) $idea['id'] ?> }
-          }));
+        // Dispatch a custom event when a user profile link is clicked (for future signals/analytics)
+        (function () {
+          const profileLink = document.querySelector('[data-user-username], [data-user-id]');
+          if (!profileLink) return;
+          profileLink.addEventListener('click', () => {
+            const uname = profileLink.getAttribute('data-user-username') || '';
+            const uid = profileLink.getAttribute('data-user-id') || '';
+            window.dispatchEvent(new CustomEvent('user:profile-click', {
+              detail: { username: uname, userId: uid ? parseInt(uid, 10) : null, ideaId: <?= (int) $idea['id'] ?> }
+            }));
+          });
+        })();
+
+        // Share button functionality
+        document.querySelector('button[title="Share idea"]')?.addEventListener('click', async function () {
+          const shareData = {
+            title: <?= json_encode(h($idea['title'])) ?>,
+            text: <?= json_encode('Check out this idea on Tindlekit: ' . h($idea['title'])) ?>,
+            url: window.location.href
+          };
+
+          try {
+            // Try Web Share API first (mobile/supported browsers)
+            if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+              await navigator.share(shareData);
+              return;
+            }
+          } catch (err) {
+            console.log('Web Share API failed:', err);
+          }
+
+          // Fallback: Copy URL to clipboard
+          try {
+            await navigator.clipboard.writeText(window.location.href);
+
+            // Show success feedback
+            const button = this;
+            const originalContent = button.innerHTML;
+            button.innerHTML = '<i class="iconoir-check"></i>';
+            button.style.background = 'var(--tk-success)';
+            button.style.color = 'var(--tk-bg)';
+
+            setTimeout(() => {
+              button.innerHTML = originalContent;
+              button.style.background = '';
+              button.style.color = '';
+            }, 2000);
+
+            console.log('URL copied to clipboard');
+          } catch (err) {
+            console.log('Clipboard API failed:', err);
+
+            // Ultimate fallback: Show copy dialog (older browsers)
+            const url = window.location.href;
+            if (window.prompt) {
+              window.prompt('Copy this URL to share:', url);
+            }
+          }
         });
-      })();
-
-      // Share button functionality
-      document.querySelector('button[title="Share idea"]')?.addEventListener('click', async function() {
-        const shareData = {
-          title: <?= json_encode(h($idea['title'])) ?>,
-          text: <?= json_encode('Check out this idea on Tindlekit: ' . h($idea['title'])) ?>,
-          url: window.location.href
-        };
-
-        try {
-          // Try Web Share API first (mobile/supported browsers)
-          if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-            await navigator.share(shareData);
-            return;
-          }
-        } catch (err) {
-          console.log('Web Share API failed:', err);
-        }
-
-        // Fallback: Copy URL to clipboard
-        try {
-          await navigator.clipboard.writeText(window.location.href);
-          
-          // Show success feedback
-          const button = this;
-          const originalContent = button.innerHTML;
-          button.innerHTML = '<i class="iconoir-check"></i>';
-          button.style.background = 'var(--tk-success)';
-          button.style.color = 'var(--tk-bg)';
-          
-          setTimeout(() => {
-            button.innerHTML = originalContent;
-            button.style.background = '';
-            button.style.color = '';
-          }, 2000);
-          
-          console.log('URL copied to clipboard');
-        } catch (err) {
-          console.log('Clipboard API failed:', err);
-          
-          // Ultimate fallback: Show copy dialog (older browsers)
-          const url = window.location.href;
-          if (window.prompt) {
-            window.prompt('Copy this URL to share:', url);
-          }
-        }
-      });
       </script>
 
       <?php include 'includes/footer.php'; ?>

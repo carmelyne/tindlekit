@@ -39,14 +39,14 @@
           <div>
             <label for="submitter_email" class="tk-label">Your Email</label>
             <input id="submitter_email" name="submitter_email" type="email" class="tk-input" placeholder="you@email.com"
-              required maxlength="254" inputmode="email" />
-            <p class="text-xs text-tk-subtle mt-1">Use a real email. We may send a quick verification link to protect
+              required maxlength="254" inputmode="email" aria-describedby="emailHelp" />
+            <p id="emailHelp" class="text-xs text-tk-subtle mt-1">Use a real email. We may send a quick verification link to protect
               the commons.</p>
           </div>
           <div>
             <label for="title" class="tk-label">Title</label>
             <input id="title" name="title" type="text" class="tk-input" placeholder="A clear, specific title" required
-              maxlength="120" />
+              maxlength="120" aria-describedby="titleHelp" />
             <p id="titleHelp" class="text-xs text-tk-subtle mt-1">Keep it short and searchable.</p>
           </div>
 
@@ -75,7 +75,7 @@
               <!-- Visible combobox input -->
               <input id="categoryCombo" type="text" class="tk-input" placeholder="Search or pick a category…"
                 role="combobox" aria-expanded="false" aria-controls="categoryListbox" aria-autocomplete="list"
-                autocomplete="off" />
+                autocomplete="off" aria-haspopup="listbox" />
               <!-- Hidden canonical field that the form submits -->
               <input type="hidden" id="category" name="category" required />
 
@@ -207,26 +207,26 @@
           <div>
             <label for="tags" class="tk-label">Tags</label>
             <input id="tags" name="tags" type="text" class="tk-input" placeholder="#education #opensource"
-              maxlength="120" pattern="^[#A-Za-z0-9\-\s_]*$" />
-            <p class="text-xs text-tk-subtle mt-1">Add relevant hashtags separated by spaces.</p>
+              maxlength="120" pattern="^[#A-Za-z0-9\-\s_]*$" aria-describedby="tags-help" />
+            <p id="tags-help" class="text-xs text-tk-subtle mt-1">Add relevant hashtags separated by spaces.</p>
           </div>
           <div class="relative">
-            <label for="license_type" class="tk-label">Preferred License</label>
-            
+            <label for="license_type" id="licenseLabel" class="tk-label">Preferred License</label>
+
             <!-- Custom dropdown button -->
             <button type="button" id="licenseCombo" class="tk-input text-left cursor-pointer flex items-center justify-between w-full"
-              aria-haspopup="listbox" aria-expanded="false" aria-labelledby="license_type">
+              aria-haspopup="listbox" aria-expanded="false" aria-controls="licenseListbox" aria-labelledby="licenseLabel licenseCombo">
               <span id="licenseSelected" class="text-tk-muted">Select a license</span>
               <i class="iconoir-nav-arrow-down"></i>
             </button>
-            
+
             <!-- Hidden input for form submission -->
-            <input type="hidden" id="license_type" name="license_type" required />
+            <input type="hidden" id="license_type" name="license_type" required aria-hidden="true" />
 
             <!-- Custom dropdown menu -->
             <div id="licenseDropdown"
               class="absolute z-10 mt-1 w-full rounded-lg border border-tk-border bg-tk-card shadow-lg hidden">
-              <ul id="licenseListbox" role="listbox" class="max-h-60 overflow-auto py-1">
+              <ul id="licenseListbox" role="listbox" class="max-h-60 overflow-auto py-1" aria-labelledby="licenseLabel">
                 <!-- Permissive -->
                 <li class="px-3 py-1 text-xs font-semibold text-tk-muted uppercase tracking-wide">Permissive</li>
                 <li role="option" data-value="MIT" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">MIT</li>
@@ -235,7 +235,7 @@
                 <li role="option" data-value="BSD-3-Clause" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">BSD 3-Clause</li>
                 <li role="option" data-value="Unlicense" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">The Unlicense</li>
                 <li role="option" data-value="CC0-1.0" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">CC0 1.0 (Public Domain)</li>
-                
+
                 <!-- Copyleft -->
                 <li class="px-3 py-1 text-xs font-semibold text-tk-muted uppercase tracking-wide border-t border-tk-border mt-2 pt-3">Copyleft</li>
                 <li role="option" data-value="GPL-2.0" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">GPL v2.0</li>
@@ -243,19 +243,19 @@
                 <li role="option" data-value="AGPL-3.0" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">AGPL v3.0</li>
                 <li role="option" data-value="LGPL-2.1" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">LGPL v2.1</li>
                 <li role="option" data-value="LGPL-3.0" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">LGPL v3.0</li>
-                
+
                 <!-- Creative Commons -->
                 <li class="px-3 py-1 text-xs font-semibold text-tk-muted uppercase tracking-wide border-t border-tk-border mt-2 pt-3">Creative Commons</li>
                 <li role="option" data-value="CC-BY-4.0" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">CC BY 4.0</li>
                 <li role="option" data-value="CC-BY-SA-4.0" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">CC BY-SA 4.0</li>
                 <li role="option" data-value="CC-BY-NC-4.0" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">CC BY-NC 4.0</li>
                 <li role="option" data-value="CC-BY-NC-SA-4.0" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">CC BY-NC-SA 4.0</li>
-                
+
                 <!-- Polyform -->
                 <li class="px-3 py-1 text-xs font-semibold text-tk-muted uppercase tracking-wide border-t border-tk-border mt-2 pt-3">Polyform</li>
                 <li role="option" data-value="Polyform-Noncommercial-1.0.0" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">Polyform Noncommercial 1.0.0</li>
                 <li role="option" data-value="Polyform-Small-Business-1.0.0" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">Polyform Small Business 1.0.0</li>
-                
+
                 <!-- Other -->
                 <li class="px-3 py-1 text-xs font-semibold text-tk-muted uppercase tracking-wide border-t border-tk-border mt-2 pt-3">Other</li>
                 <li role="option" data-value="Public-Domain" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">Public Domain (other)</li>
@@ -263,7 +263,7 @@
                 <li role="option" data-value="Other" class="cursor-pointer px-3 py-2 text-sm text-tk-fg hover:bg-tk-border">Other / Not listed</li>
               </ul>
             </div>
-            
+
             <script>
               // License dropdown functionality
               (function () {
@@ -411,7 +411,7 @@
             </div>
           </div>
 
-          <div id="formStatus" class="text-sm text-tk-muted mt-4" aria-live="polite" aria-atomic="true"></div>
+          <div id="formStatus" class="text-sm text-tk-muted mt-4" aria-live="polite" aria-atomic="true" role="status"></div>
         </form>
       </section>
     </main>
