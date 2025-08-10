@@ -10,6 +10,18 @@
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <?php $__OVERLOAD__ = getenv('LOAD_SHED') === '1'; ?>
   <script>window.__OVERLOAD__ = <?= $__OVERLOAD__ ? 'true' : 'false' ?>;</script>
+  
+  <?php $GA_KEY = getenv('GOOGLE_ANALYTICS_KEY'); ?>
+  <?php if ($GA_KEY && !empty($GA_KEY)): ?>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=<?= htmlspecialchars($GA_KEY, ENT_QUOTES, 'UTF-8') ?>"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '<?= htmlspecialchars($GA_KEY, ENT_QUOTES, 'UTF-8') ?>');
+  </script>
+  <?php endif; ?>
   <style>
     .tk-overload-banner {
       position: sticky;
