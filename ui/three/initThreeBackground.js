@@ -362,19 +362,17 @@ export const TKThree = {
   }
 };
 
-// Auto-initialize if container exists
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    const bgContainer = document.querySelector('#app-bg');
-    const flags = window.__TK_FLAGS || {};
-    if (bgContainer && flags.three !== false) {
-      TKThree.init('#app-bg');
-    }
-  });
-} else {
+// Auto-initialize if container exists (prevent duplicate initialization)
+function autoInitThree() {
   const bgContainer = document.querySelector('#app-bg');
   const flags = window.__TK_FLAGS || {};
-  if (bgContainer && flags.three !== false) {
+  if (bgContainer && flags.three !== false && !isThreeActive) {
     TKThree.init('#app-bg');
   }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', autoInitThree);
+} else {
+  autoInitThree();
 }

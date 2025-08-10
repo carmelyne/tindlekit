@@ -36,12 +36,10 @@ class TindlekitUI {
         console.log('✅ Motion system loaded');
       }
 
-      // Initialize Three.js background
+      // Three.js auto-initializes itself via its own module
+      // No need to explicitly call TKThree.init() here to avoid duplicates
       if (this.features.three) {
-        const threeLoaded = await TKThree.init();
-        if (threeLoaded) {
-          console.log('✅ Three.js background loaded');
-        }
+        console.log('✅ Three.js background will auto-initialize');
       }
 
       // Enhance existing components
