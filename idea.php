@@ -49,14 +49,18 @@ if (!$idea) {
 $id = (int)($idea['id'] ?? 0);
 
 // If request used ?id= and we have a canonical slug, 301 redirect to /idea/{slug}
+// Skip redirect under PHP built-in server or when explicitly disabled for tests/CI
 if (isset($_GET['id']) && !headers_sent()) {
-  $slugCanonical = '';
-  if (!empty($idea['slug']) && preg_match('~^[a-z0-9-]+$~', (string)$idea['slug'])) {
-    $slugCanonical = (string)$idea['slug'];
-  }
-  if ($slugCanonical !== '') {
-    header('Location: /idea/' . $slugCanonical, true, 301);
-    exit;
+  $disablePretty = (getenv('DISABLE_PRETTY_REDIRECTS') === '1') || (PHP_SAPI === 'cli-server');
+  if (!$disablePretty) {
+    $slugCanonical = '';
+    if (!empty($idea['slug']) && preg_match('~^[a-z0-9-]+$~', (string)$idea['slug'])) {
+      $slugCanonical = (string)$idea['slug'];
+    }
+    if ($slugCanonical !== '') {
+      header('Location: /idea/' . $slugCanonical, true, 301);
+      exit;
+    }
   }
 }
 

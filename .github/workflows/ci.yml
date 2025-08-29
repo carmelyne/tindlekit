@@ -48,7 +48,8 @@ jobs:
         env:
           APP_ENV: production
           BYPASS_TURNSTILE: '1'
-          CREATE_IDEA_DAILY_LIMIT: '0'
+          CREATE_IDEA_DAILY_LIMIT: '1000'
+          DISABLE_PRETTY_REDIRECTS: '1'
           DB_DSN: 'sqlite:./tindlekit_e2e.db'
           DB_USER: ''
           DB_PASS: ''
