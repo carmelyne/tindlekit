@@ -59,6 +59,7 @@ echo "📋 Copying application files (flat root only)..."
 
 FILES_TO_COPY=(
   404.html
+  500.html
   503.html
   .env
   about.php
@@ -122,9 +123,19 @@ if [ ! -f "./deploy/.htaccess" ]; then
   cat > ./deploy/.htaccess << 'HTACCESS'
 RewriteEngine On
 
+# Force HTTPS
+RewriteCond %{HTTPS} !=on
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
 # Serve custom error pages
 ErrorDocument 404 /404.html
+ErrorDocument 500 /500.html
 ErrorDocument 503 /503.html
+
+# Alternative error document format for some shared hosts
+# ErrorDocument 404 "404.html"
+# ErrorDocument 500 "500.html"
+# ErrorDocument 503 "503.html"
 
 # Enable gzip compression
 <IfModule mod_deflate.c>
@@ -156,6 +167,14 @@ ErrorDocument 503 /503.html
 
 # Disable directory browsing
 Options -Indexes
+
+    # Pretty routes
+    # /idea/{slug} -> idea.php?slug={slug}
+    RewriteRule ^idea/([a-z0-9-]+)/?$ idea.php?slug=$1 [L,QSA]
+    # /user/{username} -> user.php?username={username}
+    RewriteRule ^user$ - [R=404,L]
+    RewriteRule ^user/$ - [R=404,L]
+    RewriteRule ^user/([A-Za-z0-9._-]+)/?$ user.php?username=$1 [L,QSA]
 
 # Pretty URLs (remove .php from URLs)
 RewriteCond %{REQUEST_FILENAME} !-d
@@ -194,6 +213,15 @@ fi
 
 echo "📊 Deployment package contents:"
 ls -la ./deploy
+
+echo "🔍 Checking critical files:"
+for critical_file in "404.html" "500.html" "503.html" "index.php" ".htaccess"; do
+  if [ -f "./deploy/$critical_file" ]; then
+    echo "✅ $critical_file found"
+  else
+    echo "❌ $critical_file MISSING"
+  fi
+done
 
 # Cache busting (flat root only)
 TS=$(date +%s)

@@ -4,7 +4,8 @@
       "Bash(npm run build:css:*)",
       "Bash(npm run dev)",
       "Bash(npm run build)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(npx playwright test:*)"
     ],
     "deny": []
   }

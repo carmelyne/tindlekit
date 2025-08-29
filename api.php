@@ -132,6 +132,45 @@ function normalize_email(string $s): string {
 }
 }
 
+// --- Helper: slugify, unique_token, make_username ---
+if (!function_exists('slugify')) {
+function slugify(string $s): string {
+  // ASCII fold (safe fallback if iconv not available)
+  if (function_exists('iconv')) {
+    $i = @iconv('UTF-8','ASCII//TRANSLIT//IGNORE',$s);
+    if ($i !== false) $s = $i;
+  }
+  $s = strtolower($s);
+  $s = preg_replace('~[^a-z0-9]+~','-',$s);
+  $s = preg_replace('~-+~','-',$s);
+  return trim((string)$s, '-') ?: 'x';
+}
+}
+if (!function_exists('unique_token')) {
+function unique_token(PDO $pdo, string $table, string $col, string $base): string {
+  $tok = $base; $n = 2;
+  $check = $pdo->prepare("SELECT 1 FROM `$table` WHERE `$col` = ? LIMIT 1");
+  while (true) {
+    $check->execute([$tok]);
+    if (!$check->fetchColumn()) return $tok;
+    $tok = $base . '-' . ($n++);
+  }
+}
+}
+if (!function_exists('make_username')) {
+function make_username(?string $name, ?string $email): string {
+  $local = '';
+  if ($name && trim($name) !== '') {
+    $local = $name;
+  } elseif ($email && strpos($email,'@') !== false) {
+    $local = explode('@',$email)[0];
+  } else {
+    $local = (string)$email;
+  }
+  return slugify($local);
+}
+}
+
 if (!function_exists('verify_turnstile')) {
 function verify_turnstile(?string $token, ?string $ip): bool {
   // Test bypass: allow unit/e2e tests to skip external verification
@@ -317,6 +356,50 @@ switch ($action) {
         break;
       }
 
+      // --- Derive username & user_id (no auth) + idea slug ---------------------
+      $pdo->beginTransaction();
+      try {
+        // Upsert user by email
+        $uSel = $pdo->prepare('SELECT user_id, username, display_name FROM users WHERE email = ? LIMIT 1');
+        $uSel->execute([$submitter_email]);
+        $u = $uSel->fetch(PDO::FETCH_ASSOC);
+
+        if ($u) {
+          $submitter_user_id = (int)$u['user_id'];
+          $username = (string)($u['username'] ?? '');
+          if ($username === '') {
+            $base = make_username($submitter_name, $submitter_email);
+            $username = unique_token($pdo, 'users', 'username', $base);
+            $uUpd = $pdo->prepare('UPDATE users SET display_name = ?, username = ?, updated_at = NOW() WHERE user_id = ?');
+            $uUpd->execute([$submitter_name, $username, $submitter_user_id]);
+          }
+        } else {
+          $base = make_username($submitter_name, $submitter_email);
+          $username = unique_token($pdo, 'users', 'username', $base);
+          $now = date('Y-m-d H:i:s');
+          $uIns = $pdo->prepare('INSERT INTO users (email, display_name, username, created_at, updated_at) VALUES (?,?,?,?,?)');
+          $uIns->execute([$submitter_email, $submitter_name, $username, $now, $now]);
+          $submitter_user_id = (int)$pdo->lastInsertId();
+        }
+
+        // Prepare canonical idea slug (unique)
+        $baseSlug = slugify($title);
+        $idea_slug = unique_token($pdo, 'ideas', 'slug', $baseSlug);
+
+        // Stash for later phases in this request
+        $_TK_USERNAME = $username;
+        $_TK_USER_ID  = $submitter_user_id;
+        $_TK_IDEA_SLUG = $idea_slug;
+
+        // Defer commit until after idea insert
+      } catch (Throwable $e) {
+        $pdo->rollBack();
+        http_response_code(500);
+        echo json_encode(['error' => 'user_upsert_failed']);
+        break;
+      }
+      // -------------------------------------------------------------------------
+
       $file_path = null;
       $file_mime = null;
       $file_size = null;
@@ -377,7 +460,11 @@ switch ($action) {
       }
 
       $ip = client_ip_bin();
-      $stmt = $pdo->prepare('INSERT INTO ideas (title, summary, submit_ip, url, video_url, file_path, file_mime, file_size, submitter_name, submitter_email, license_type, support_needs, category, tags) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+      $stmt = $pdo->prepare('INSERT INTO ideas (
+        title, summary, submit_ip, url, video_url, file_path, file_mime, file_size,
+        submitter_name, submitter_email, submitter_user_id, slug,
+        license_type, support_needs, category, tags
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
       $stmt->execute([
         $title,
         $summary,
@@ -389,12 +476,22 @@ switch ($action) {
         $file_size,
         $submitter_name,
         $submitter_email,
+        (int)($_TK_USER_ID ?? 0),
+        (string)($_TK_IDEA_SLUG ?? ''),
         $license_type,
         $support_needs,
         $category,
         $tags_csv
       ]);
-      echo json_encode(['ok' => true, 'id' => $pdo->lastInsertId()]);
+      // Commit the user/slug transaction now that idea is inserted
+      $pdo->commit();
+      $newId = (int)$pdo->lastInsertId();
+      echo json_encode([
+        'ok' => true,
+        'id' => $newId,
+        'idea_url' => '/idea/' . (string)($_TK_IDEA_SLUG ?? ''),
+        'user_url' => '/user/' . (string)($_TK_USERNAME ?? '')
+      ]);
     } catch (Throwable $e) {
       http_response_code(500);
       echo json_encode([

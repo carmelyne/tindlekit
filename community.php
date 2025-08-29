@@ -1,7 +1,10 @@
 <!doctype html>
 <html lang="en" class="h-full">
 
-  <?php include 'includes/head.php'; ?>
+  <?php $pageType = 'community';
+  $pageTitle = 'Community — Tindlekit';
+  $canonicalURL = 'https://tindlekit.com/community';
+  include 'includes/head.php'; ?>
 
   <body class="h-full">
     <!-- Three.js background container -->

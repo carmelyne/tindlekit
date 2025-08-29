@@ -1,7 +1,13 @@
 <!doctype html>
 <html lang="en" class="h-full">
 
-  <?php include 'includes/head.php'; ?>
+  <?php
+  $pageType = 'home';
+  $pageTitle = 'Tindlekit — Open Source Ideas Leaderboard';
+  $metaDesc = 'Discover and support the best open source ideas…';
+  $canonicalURL = 'https://tindlekit.com/';   // always https
+  $metaKeywords = ['tindlekit', 'opensource', 'community', 'innovation'];
+  include __DIR__ . '/includes/head.php'; ?>
 
   <body class="h-full">
     <!-- Three.js background container -->

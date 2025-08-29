@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Page not found — Tindlekit</title>
+    <title>Server Error — Tindlekit</title>
     <meta name="robots" content="noindex">
     <style>
       :root {
@@ -62,7 +62,7 @@
         align-items: center
       }
 
-      .icon {
+      .whale {
         font-size: 42px
       }
 
@@ -92,49 +92,25 @@
         background: linear-gradient(90deg, #06b6d4, #22d3ee);
         color: #07101f
       }
-
-      .search {
-        display: flex;
-        gap: 8px;
-        margin-top: 12px
-      }
-
-      .search input {
-        flex: 1;
-        min-width: 220px;
-        background: #0f1528;
-        border: 1px solid #2a3a56;
-        border-radius: 10px;
-        padding: 10px 12px;
-        color: var(--fg)
-      }
-
-      .search input::placeholder {
-        color: #7a8ba5
-      }
     </style>
   </head>
 
   <body>
-    <div class="card" role="main" aria-labelledby="nf-title">
+    <div class="card" role="status" aria-live="polite">
       <div class="row">
-        <div class="icon">🧭</div>
+        <div class="whale">🔧</div>
         <div>
-          <h1 id="nf-title">Tindlekit 404: This page doesn’t exist</h1>
-          <p>Looks like you’ve wandered off the map. I’m a broke dev hosting this on a tiny box, so some links might be
-            missing in action. Don’t worry—reading still works fine.</p>
+          <h1>Tindlekit 500: Something broke</h1>
+          <p>Oops! Something went wrong on our end. This is likely a server error or configuration issue. 
+            Don't worry, it's not your fault — we'll get this fixed.</p>
         </div>
       </div>
       <div class="cta">
         <a class="btn primary" href="/">Back to Leaderboard</a>
-        <a class="btn" href="https://tindlekit.com/submit-idea.php">Submit an Idea</a>
-        <a class="btn" href="https://tindlekit.com/user/carmelyne">See a sample profile</a>
+        <a class="btn" href="/user.php?email=hello@carmelyne.com">See a sample profile</a>
       </div>
-
-      <form class="search" action="/" method="get" role="search" aria-label="Search ideas">
-        <input type="search" name="q" placeholder="Search ideas…" aria-label="Search ideas">
-        <button class="btn" type="submit">Search</button>
-      </form>
+      <p style="margin-top:12px">If you keep seeing this error, please try refreshing the page. We've been notified and 
+        are working on a fix. Thanks for your patience! 💚</p>
     </div>
   </body>
 
