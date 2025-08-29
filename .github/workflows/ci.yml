@@ -57,7 +57,7 @@ jobs:
           putenv('DB_DSN=sqlite:./tindlekit_e2e.db');
           putenv('DB_USER=');
           putenv('DB_PASS=');
-          require 'tests/bootstrap.php';
+          require 'tests/bootstrap_e2e.php';
           echo 'SQLite database initialized for E2E tests\n';
           "
           php -S 127.0.0.1:8080 -t . > server.log 2>&1 &

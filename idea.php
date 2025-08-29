@@ -3,11 +3,15 @@
 require __DIR__ . '/config.php';
 
 try {
-  $pdo = new PDO($DB_DSN, $DB_USER, $DB_PASS, [
+  $options = [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
-  ]);
+  ];
+  // Only set MySQL init command when using a MySQL DSN and the constant exists
+  if (isset($DB_DSN) && is_string($DB_DSN) && str_starts_with($DB_DSN, 'mysql:') && defined('PDO::MYSQL_ATTR_INIT_COMMAND')) {
+    $options[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET NAMES utf8mb4";
+  }
+  $pdo = new PDO($DB_DSN, $DB_USER, $DB_PASS, $options);
 } catch (Throwable $e) {
   http_response_code(500);
   echo 'DB connection failed';
