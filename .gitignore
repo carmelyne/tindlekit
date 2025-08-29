@@ -30,6 +30,7 @@ Thumbs.db
 # Test artifacts
 playwright-report/
 test-results/
+.phpunit.result.cache
 
 # Backups & temp files
 *.bak
