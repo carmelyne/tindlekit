@@ -519,6 +519,7 @@ $usd_est = ((int) ($idea['tokens'] ?? 0)) * $TOKEN_USD;
 
       </div>
 
+      <script>window.__bypassTurnstile = <?= (getenv('BYPASS_TURNSTILE') === '1') ? 'true' : 'false' ?>;</script>
       <script type="module" src="ui/tindlekit.js"></script>
 
       <script type="module">
@@ -679,9 +680,10 @@ $usd_est = ((int) ($idea['tokens'] ?? 0)) * $TOKEN_USD;
           const status = document.getElementById('interestStatus');
           const btn = document.getElementById('interestSubmitBtn');
           const form = e.currentTarget;
-          // Ensure Cloudflare Turnstile token is present
+          // Ensure Cloudflare Turnstile token is present (skip when bypass flag is set)
           const turnstileInput = form.querySelector('input[name="cf-turnstile-response"]');
           const turnstileToken = (turnstileInput && turnstileInput.value) ? turnstileInput.value.trim() : '';
+          const bypassTurnstile = (window.__bypassTurnstile === true);
           const supporter_name = form.supporter_name.value.trim();
           const supporter_email = form.supporter_email.value.trim();
           const pledge_type = form.pledge_type.value;
@@ -697,7 +699,7 @@ $usd_est = ((int) ($idea['tokens'] ?? 0)) * $TOKEN_USD;
             status.textContent = 'Please enter a valid token amount (≥ 1).';
             return;
           }
-          if (!turnstileToken) {
+          if (!turnstileToken && !bypassTurnstile) {
             status.textContent = 'Please complete the security verification.';
             return;
           }
@@ -713,7 +715,7 @@ $usd_est = ((int) ($idea['tokens'] ?? 0)) * $TOKEN_USD;
             if (isToken && tokensAmount > 0) {
               fd.append('tokens', String(tokensAmount));
             }
-            fd.append('cf-turnstile-response', turnstileToken);
+            fd.append('cf-turnstile-response', turnstileToken || (bypassTurnstile ? 'bypass' : ''));
             const res = await fetch('api.php?action=express_interest', { method: 'POST', body: fd });
             if (!res.ok) throw new Error('HTTP ' + res.status);
             status.textContent = '✅ Thank you for your pledge!';
