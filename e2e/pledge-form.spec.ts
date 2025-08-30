@@ -27,15 +27,14 @@ test('pledge form shows and validates', async ({ page }) => {
   
   const ideaId = data.id;
   
-  // Use ID-based URL which will redirect to pretty URL format
-  // idea.php handles the redirect from ?id= to /idea/{slug} automatically
+  // Navigate to detail page; in CI we may stay on idea.php?id= due to disabled redirects
   await page.goto(`/idea.php?id=${ideaId}`);
   
-  // Expect redirect to pretty URL format /idea/{slug}
-  await expect(page).toHaveURL(/\/idea\/[a-z0-9-]+$/);
+  // Accept either pretty URL (/idea/{slug}) or the raw PHP route (/idea.php?id=ID)
+  await expect(page).toHaveURL(/(\/idea\.php\?id=\d+|\/idea\/[a-z0-9-]+)$/);
   
   // Wait for page to load and check for key elements
-  await expect(page.getByText('Test AI Idea')).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Test AI Idea' })).toBeVisible();
   await expect(page.getByText('Send Pledge')).toBeVisible();
 
   // Fill the form
